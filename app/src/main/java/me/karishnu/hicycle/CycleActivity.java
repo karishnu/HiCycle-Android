@@ -1,6 +1,7 @@
 package me.karishnu.hicycle;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
@@ -68,16 +69,25 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
 
     AcademicsAPIService academicsAPIService;
     SharedPreferences preference;
+    ProgressDialog progress;
 
     @Override
     public void onClick(View view) {
+        progress = new ProgressDialog(this);
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.setIndeterminate(true);
+
         academicsAPIService = APIClient.getClient();
         preference = PreferenceManager.getDefaultSharedPreferences(this);
         if(status_code==0) {
+
+            progress.setMessage("Booking bike. Please wait.");
+            progress.show();
             Call<CycleResponse> cycleResponseCall = academicsAPIService.bookCycle(getIntent().getStringExtra("cycle_id"), preference.getString("token_id", "none"));
             cycleResponseCall.enqueue(new Callback<CycleResponse>() {
                 @Override
                 public void onResponse(Call<CycleResponse> call, Response<CycleResponse> response) {
+                    progress.dismiss();
                     if (response.body().getCycle().getStatus().equals("booked")) {
                         submit.setText("UNLOCK CYCLE");
 
@@ -103,7 +113,7 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
 
                 @Override
                 public void onFailure(Call<CycleResponse> call, Throwable t) {
-
+                    progress.dismiss();
                 }
             });
         }
@@ -114,10 +124,13 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
 
         }
         else if(status_code == 2){
+            progress.setMessage("Ending trip. Please wait!");
+            progress.show();
             Call<CycleResponse> cycleResponseCall = academicsAPIService.lockCycle(getIntent().getStringExtra("cycle_id"), preference.getString("token_id", "none"));
             cycleResponseCall.enqueue(new Callback<CycleResponse>() {
                 @Override
                 public void onResponse(Call<CycleResponse> call, Response<CycleResponse> response) {
+                    progress.dismiss();
                     if (response.body().getCycle().getStatus().equals("locked")) {
                         finish();
 
@@ -127,7 +140,7 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
 
                 @Override
                 public void onFailure(Call<CycleResponse> call, Throwable t) {
-
+                    progress.dismiss();
                 }
             });
         }
@@ -140,10 +153,14 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
             if(resultCode == Activity.RESULT_OK){
                 String result=data.getStringExtra("result");
 
+                progress.setMessage("Sending unlock request. Please wait!");
+                progress.show();
+
                 Call<CycleResponse> cycleResponseCall = academicsAPIService.unlockCycle(result, preference.getString("token_id", "none"));
                 cycleResponseCall.enqueue(new Callback<CycleResponse>() {
                     @Override
                     public void onResponse(Call<CycleResponse> call, Response<CycleResponse> response) {
+                        progress.dismiss();
                         if (response.body().getCycle().getStatus().equals("unlocked")) {
                             submit.setText("FINISH RIDE");
 
@@ -153,7 +170,7 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
 
                     @Override
                     public void onFailure(Call<CycleResponse> call, Throwable t) {
-
+                        progress.dismiss();
                     }
                 });
             }

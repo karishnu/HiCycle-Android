@@ -1,15 +1,18 @@
 package me.karishnu.hicycle;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -28,6 +31,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private AcademicsAPIService academicsAPIService;
     private List<Cycle> cycleList;
+    private Button refresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +43,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         academicsAPIService = APIClient.getClient();
+
+        refresh = (Button) findViewById(R.id.bt_refresh);
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateCycles();
+            }
+        });
     }
 
 
@@ -56,34 +68,60 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
 
+        updateCycles();
+    }
+
+    ProgressDialog progress;
+
+    private void updateCycles(){
+
+        progress = new ProgressDialog(this);
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.setIndeterminate(true);
+        progress.setMessage("Searching for bikes nearby.");
+
+        progress.show();
+
         final LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        mMap.clear();
 
         Call<CyclesResponse> cyclesResponseCall = academicsAPIService.getCycles();
         cyclesResponseCall.enqueue(new Callback<CyclesResponse>() {
             @Override
             public void onResponse(Call<CyclesResponse> call, Response<CyclesResponse> response) {
                 cycleList = response.body().getCycles();
-                for(Cycle cycle: cycleList){
-                    LatLng sydney = new LatLng(Double.parseDouble(cycle.getCoodX()),Double.parseDouble(cycle.getCoodY()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(sydney));
-                    marker.setTag(cycle.getCycleId());
-                    builder.include(sydney);
+
+                if(cycleList.isEmpty()){
+                    progress.dismiss();
+                    Toast.makeText(MapsActivity.this, "No bokes found nearby!", Toast.LENGTH_LONG).show();
                 }
+                else {
 
-                LatLngBounds bounds = builder.build();
+                    for (Cycle cycle : cycleList) {
+                        LatLng sydney = new LatLng(Double.parseDouble(cycle.getCoodX()), Double.parseDouble(cycle.getCoodY()));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(sydney));
+                        marker.setTag(cycle.getCycleId());
+                        builder.include(sydney);
+                    }
 
-                int width = getResources().getDisplayMetrics().widthPixels;
-                int height = getResources().getDisplayMetrics().heightPixels;
-                int padding = (int) (width * 0.20);
+                    LatLngBounds bounds = builder.build();
 
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+                    int width = getResources().getDisplayMetrics().widthPixels;
+                    int height = getResources().getDisplayMetrics().heightPixels;
+                    int padding = (int) (width * 0.20);
 
-                mMap.animateCamera(cu);
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+
+                    progress.dismiss();
+
+                    mMap.animateCamera(cu);
+                }
             }
 
             @Override
             public void onFailure(Call<CyclesResponse> call, Throwable t) {
-
+                progress.dismiss();
             }
         });
     }
