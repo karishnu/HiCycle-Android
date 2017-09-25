@@ -2,6 +2,7 @@ package me.karishnu.hicycle;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -100,7 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     for (Cycle cycle : cycleList) {
                         LatLng sydney = new LatLng(Double.parseDouble(cycle.getCoodX()), Double.parseDouble(cycle.getCoodY()));
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(sydney));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
                         marker.setTag(cycle.getCycleId());
                         builder.include(sydney);
                     }
