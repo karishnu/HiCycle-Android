@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "74013821669",
+    "project_id": "siemens-hack"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74013821669:android:8accad105d52e253",
+        "android_client_info": {
+          "package_name": "me.karishnu.hicycle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "74013821669-bss5o4ic70d5edthrrm8d4p95g1vhumr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "me.karishnu.hicycle",
+            "certificate_hash": "62b830edbf5475b02354932007099b20cd0a0c8c"
+          }
+        },
+        {
+          "client_id": "74013821669-a0qj3dqpn3lku8uupv1emufjehhg2kjl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ_gpZszvenVH99KrGUJC7wGQvw0WYLZU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
