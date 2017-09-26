@@ -50,7 +50,7 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
         submit.setOnClickListener(this);
 
         Glide.with(this)
-                .load("https://maps.googleapis.com/maps/api/staticmap?center="+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon")+"&zoom=19&size=400x400&maptype=roadmap&markers=color:green%7C"+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon"))
+                .load("https://maps.googleapis.com/maps/api/staticmap?center="+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon")+"&zoom=19&size=400x400&maptype=roadmap&markers=color:green%7Cicon:https://image.ibb.co/kijPG5/marker.png%7C"+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon"))
                 .into(imageView);
 
         address.setText(getAddress(Double.parseDouble(getIntent().getStringExtra("lat")), Double.parseDouble(getIntent().getStringExtra("lon"))));
