@@ -16,7 +16,7 @@
         android:lines="2"
         android:textAlignment="center"
         android:layout_marginTop="10dp"
-        android:text="You will have 5 minutes to reach the pickup point once you book"
+        android:text="You will have 10 minutes to reach the pickup point once you book."
         android:textColor="#FFFFFF"
         android:layout_alignParentTop="true"/>
 
@@ -29,8 +29,8 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_map"
-            android:layout_width="280dp"
-            android:layout_height="280dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
             android:layout_gravity="center_horizontal"/>
 
         <TextView
@@ -43,6 +43,16 @@
             android:layout_marginTop="10dp"
             android:textColor="#FFFFFF"/>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/bt_nav"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#FFFFFF"
+        android:text="NAVIGATE"
+        android:layout_above="@+id/bt_submit"/>
 
     <Button
         android:id="@+id/bt_submit"

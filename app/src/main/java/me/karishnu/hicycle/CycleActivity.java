@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -19,6 +20,8 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -32,7 +35,7 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
 
     TextView address, status;
     CircleImageView imageView;
-    Button submit;
+    Button submit, nav;
     int status_code;
 
     @Override
@@ -46,8 +49,18 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
         status = (TextView) findViewById(R.id.tv_status);
         imageView = (CircleImageView) findViewById(R.id.iv_map);
         submit = (Button) findViewById(R.id.bt_submit);
+        nav = (Button) findViewById(R.id.bt_nav);
 
         submit.setOnClickListener(this);
+
+        nav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse("http://maps.google.com/maps?daddr="+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon")));
+                startActivity(intent);
+            }
+        });
 
         Glide.with(this)
                 .load("https://maps.googleapis.com/maps/api/staticmap?center="+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon")+"&zoom=19&size=400x400&maptype=roadmap&markers=color:green%7Cicon:https://image.ibb.co/kijPG5/marker.png%7C"+getIntent().getStringExtra("lat")+","+getIntent().getStringExtra("lon"))
@@ -70,6 +83,7 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
     AcademicsAPIService academicsAPIService;
     SharedPreferences preference;
     ProgressDialog progress;
+    CountDownTimer countDownTimer;
 
     @Override
     public void onClick(View view) {
@@ -90,8 +104,9 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
                     progress.dismiss();
                     if (response.body().getCycle().getStatus().equals("booked")) {
                         submit.setText("UNLOCK CYCLE");
+                        status.setTextSize(32);
 
-                        CountDownTimer countDownTimer = new CountDownTimer(5 * 60 * 1000, 1000) {
+                        countDownTimer = new CountDownTimer(10 * 60 * 1000, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
                                 String text = String.format(Locale.getDefault(), "%02d:%02d",
@@ -146,11 +161,16 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private long startTime;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
+
+                nav.setVisibility(View.GONE);
+
                 String result=data.getStringExtra("result");
 
                 progress.setMessage("Sending unlock request. Please wait!");
@@ -165,6 +185,34 @@ public class CycleActivity extends AppCompatActivity implements View.OnClickList
                             submit.setText("FINISH RIDE");
 
                             status_code = 2;
+
+                            imageView.setVisibility(View.GONE);
+                            countDownTimer.cancel();
+
+                            startTime = System.currentTimeMillis();
+                            status.setTextSize(32);
+
+                            Timer timer = new Timer();
+                            timer.scheduleAtFixedRate(new TimerTask() {
+
+                                @Override
+                                public void run() {
+                                    final Long spentTime = System.currentTimeMillis() - startTime;
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            int minutes = (int) (spentTime/60000);
+                                            int hours = (int) (spentTime - (minutes*60000))/3600000;
+
+                                            status.setText(hours+" hours and "+minutes+" minutes");
+                                            address.setTextSize(36);
+                                            address.setText("Amount: " + ((hours+1)*9) + " rupees");
+                                        }
+                                    });
+
+                                }
+                            },0, 1000);
                         }
                     }
 
